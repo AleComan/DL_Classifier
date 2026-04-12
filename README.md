@@ -27,7 +27,8 @@ real-estate-classifier/
 │   └── streamlit_app.py    # Streamlit front-end
 │
 ├── models/
-│   └── best_model.pth      # Saved checkpoint (created after training)
+│   ├── best_model.pth      # Global best checkpoint (updated automatically)
+│   └── model_<run_id>.pth  # Per-run checkpoints (one per sweep run)
 │
 ├── environment.yml
 └── README.md
@@ -81,6 +82,8 @@ data/
     └── ...
 ```
 
+Images can have variable sizes and aspect ratios — the pipeline handles resizing automatically to 224x224.
+
 ---
 
 ## Training
@@ -98,9 +101,9 @@ Training runs in two phases:
 - **Phase 1** — backbone frozen, only the classification head is trained (`epochs_phase1` epochs, `lr_phase1`)
 - **Phase 2** — full network unfrozen, fine-tuned at a lower learning rate (`epochs_phase2` epochs, `lr_phase2`)
 
-The best checkpoint by validation accuracy is saved automatically to `models/best_model.pth`.
+The best checkpoint by validation accuracy is saved to `models/best_model.pth`. If it is the best run seen so far across all runs, it also updates the global best.
 
-### Hyperparameter sweep (W&B)
+### Hyperparameter sweep (W&B Bayesian optimisation)
 
 Create the sweep once:
 
@@ -109,13 +112,28 @@ cd src
 wandb sweep --project real-estate-classifier sweep.yaml
 ```
 
-Then launch the agent (run until satisfied, stop with `Ctrl+C`):
+Then launch the agent (stop anytime with Ctrl+C):
 
 ```bash
 wandb agent your_username/real-estate-classifier/<sweep_id>
 ```
 
-The sweep searches over backbone, dropout, learning rates, label smoothing, and batch size using Bayesian optimisation.
+The sweep searches over backbone, dropout, learning rates, label smoothing, and batch size using Bayesian optimisation. Each run saves its own checkpoint to `models/model_<run_id>.pth` and updates `models/best_model.pth` only if it beats the current global best.
+
+### Recovering a checkpoint from a previous run
+
+If a better run was overwritten, checkpoints can be recovered in two ways:
+
+**From local W&B files:**
+```bash
+dir "...\DL_Classifier\src\wandb" /s /b | findstr "best_model.pth"
+```
+Then copy the relevant file:
+```bash
+copy "...\wandb\run-<id>\files\best_model.pth" "...\models\best_model.pth"
+```
+
+**From W&B cloud:** go to the run in [wandb.ai](https://wandb.ai) -> Files tab -> download `best_model.pth`.
 
 ---
 
@@ -136,6 +154,7 @@ Edit `src/config.yaml` to change any training parameter:
 | `train.lr_phase1` | `0.001` | Learning rate for phase 1 |
 | `train.lr_phase2` | `0.0001` | Learning rate for phase 2 |
 | `train.label_smoothing` | `0.1` | Label smoothing factor |
+| `wandb.mode` | `online` | Set to `offline` to disable cloud sync |
 
 ---
 
@@ -161,8 +180,8 @@ streamlit run streamlit_app.py
 
 Then open:
 
-- Streamlit app → [http://localhost:8501](http://localhost:8501)
-- API docs (Swagger) → [http://localhost:8000/docs](http://localhost:8000/docs)
+- Streamlit app -> http://localhost:8501
+- API docs (Swagger) -> http://localhost:8000/docs
 
 ### API endpoints
 
@@ -171,6 +190,7 @@ Then open:
 | `GET` | `/` | Health check and model info |
 | `GET` | `/classes` | List of available classes |
 | `POST` | `/predict` | Classify an uploaded image |
+| `POST` | `/reload` | Hot-reload the model from disk without restarting |
 
 **Example `/predict` response:**
 
@@ -188,19 +208,55 @@ Then open:
 }
 ```
 
+### Reloading the model without restarting
+
+After replacing `models/best_model.pth` with a better checkpoint, reload the API without downtime:
+
+```bash
+curl -X POST http://localhost:8000/reload
+```
+
+Or use the **Reload model** button in the Streamlit sidebar.
+
+### Identifying the active model
+
+The Streamlit sidebar shows the run ID, backbone, validation accuracy, and epoch of the checkpoint currently loaded by the API — useful when running multiple sweep experiments.
+
 ---
 
 ## Results
 
-Best run (EfficientNet-B0, two-phase fine-tuning):
+> Results below reflect the best run found so far. Update after sweeps complete.
 
 | Metric | Value |
 |--------|-------|
-| Validation accuracy | **96.1%** |
-| Macro F1-score | **0.96** |
-| Parameters | 4.0M |
+| Validation accuracy | **XX.X%** |
+| Macro F1-score | **X.XX** |
+| Best backbone | `efficientnet_bX` |
+| Best dropout | `X.X` |
+| Best lr phase 1 | `X.XXXX` |
+| Best lr phase 2 | `X.XXXXX` |
+| Sweep runs completed | **XX** |
 
-Hardest classes: `Living room` (F1 0.91), `Inside city` (F1 0.93), `Open country` (F1 0.93) — visually similar to adjacent categories.
+**Per-class F1-score (best run):**
+
+| Class | Precision | Recall | F1 |
+|-------|-----------|--------|----|
+| Bedroom | X.XX | X.XX | X.XX |
+| Coast | X.XX | X.XX | X.XX |
+| Forest | X.XX | X.XX | X.XX |
+| Highway | X.XX | X.XX | X.XX |
+| Industrial | X.XX | X.XX | X.XX |
+| Inside city | X.XX | X.XX | X.XX |
+| Kitchen | X.XX | X.XX | X.XX |
+| Living room | X.XX | X.XX | X.XX |
+| Mountain | X.XX | X.XX | X.XX |
+| Office | X.XX | X.XX | X.XX |
+| Open country | X.XX | X.XX | X.XX |
+| Store | X.XX | X.XX | X.XX |
+| Street | X.XX | X.XX | X.XX |
+| Suburb | X.XX | X.XX | X.XX |
+| Tall building | X.XX | X.XX | X.XX |
 
 ---
 
