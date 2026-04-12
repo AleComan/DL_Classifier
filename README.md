@@ -120,21 +120,6 @@ wandb agent your_username/DL-classifier/<sweep_id>
 
 The sweep searches over backbone, dropout, learning rates, label smoothing, and batch size using Bayesian optimisation. Each run saves its own checkpoint to `models/model_<run_id>.pth` and updates `models/best_model.pth` only if it beats the current global best.
 
-### Recovering a checkpoint from a previous run
-
-If a better run was overwritten, checkpoints can be recovered in two ways:
-
-**From local W&B files:**
-```bash
-dir "...\DL_Classifier\src\wandb" /s /b | findstr "best_model.pth"
-```
-Then copy the relevant file:
-```bash
-copy "...\wandb\run-<id>\files\best_model.pth" "...\models\best_model.pth"
-```
-
-**From W&B cloud:** go to the run in [wandb.ai](https://wandb.ai) -> Files tab -> download `best_model.pth`.
-
 ---
 
 ## Configuration reference
