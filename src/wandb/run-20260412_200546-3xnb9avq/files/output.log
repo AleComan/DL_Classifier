@@ -42,3 +42,50 @@ Clases (15): ['Bedroom', 'Coast', 'Forest', 'Highway', 'Industrial', 'Inside cit
     ✓ Mejor modelo guardado (val_acc=0.907) → model_3xnb9avq.pth
   [Fase 2] Epoch 04/20 | train_loss=0.7350 train_acc=0.970 | val_loss=0.8497 val_acc=0.913
     ✓ Mejor modelo guardado (val_acc=0.913) → model_3xnb9avq.pth
+  [Fase 2] Epoch 05/20 | train_loss=0.7229 train_acc=0.973 | val_loss=0.8802 val_acc=0.894
+  [Fase 2] Epoch 06/20 | train_loss=0.7179 train_acc=0.975 | val_loss=0.8572 val_acc=0.911
+  [Fase 2] Epoch 07/20 | train_loss=0.7147 train_acc=0.977 | val_loss=0.8250 val_acc=0.921
+    ★ Nuevo mejor modelo global (val_acc=0.921)
+    ✓ Mejor modelo guardado (val_acc=0.921) → model_3xnb9avq.pth
+  [Fase 2] Epoch 08/20 | train_loss=0.6970 train_acc=0.982 | val_loss=0.8328 val_acc=0.912
+  [Fase 2] Epoch 09/20 | train_loss=0.6966 train_acc=0.983 | val_loss=0.8082 val_acc=0.927
+    ★ Nuevo mejor modelo global (val_acc=0.927)
+    ✓ Mejor modelo guardado (val_acc=0.927) → model_3xnb9avq.pth
+  [Fase 2] Epoch 10/20 | train_loss=0.6894 train_acc=0.986 | val_loss=0.8153 val_acc=0.920
+  [Fase 2] Epoch 11/20 | train_loss=0.6811 train_acc=0.989 | val_loss=0.8127 val_acc=0.923
+  [Fase 2] Epoch 12/20 | train_loss=0.6764 train_acc=0.988 | val_loss=0.8017 val_acc=0.925
+  [Fase 2] Epoch 13/20 | train_loss=0.6756 train_acc=0.990 | val_loss=0.8120 val_acc=0.921
+  [Fase 2] Epoch 14/20 | train_loss=0.6711 train_acc=0.992 | val_loss=0.8071 val_acc=0.925
+  [Fase 2] Epoch 15/20 | train_loss=0.6726 train_acc=0.989 | val_loss=0.7959 val_acc=0.926
+  [Fase 2] Epoch 16/20 | train_loss=0.6645 train_acc=0.993 | val_loss=0.7957 val_acc=0.927
+    ★ Nuevo mejor modelo global (val_acc=0.927)
+    ✓ Mejor modelo guardado (val_acc=0.927) → model_3xnb9avq.pth
+  [Fase 2] Epoch 17/20 | train_loss=0.6686 train_acc=0.990 | val_loss=0.7934 val_acc=0.927
+  [Fase 2] Epoch 18/20 | train_loss=0.6619 train_acc=0.993 | val_loss=0.7939 val_acc=0.927
+  [Fase 2] Epoch 19/20 | train_loss=0.6662 train_acc=0.991 | val_loss=0.7924 val_acc=0.929
+    ★ Nuevo mejor modelo global (val_acc=0.929)
+    ✓ Mejor modelo guardado (val_acc=0.929) → model_3xnb9avq.pth
+  [Fase 2] Epoch 20/20 | train_loss=0.6588 train_acc=0.996 | val_loss=0.7922 val_acc=0.929
+
+=== Informe de clasificación (mejor modelo) ===
+               precision    recall  f1-score   support
+
+      Bedroom       0.94      0.75      0.83       100
+        Coast       0.91      0.96      0.94       100
+       Forest       0.99      0.98      0.98       100
+      Highway       0.94      0.98      0.96       100
+   Industrial       0.90      0.89      0.89       100
+  Inside city       0.92      0.89      0.90       100
+      Kitchen       0.87      0.92      0.89       100
+  Living room       0.76      0.90      0.82       100
+     Mountain       0.98      0.99      0.99       100
+       Office       0.97      0.93      0.95       100
+ Open country       0.97      0.89      0.93       100
+        Store       0.95      0.93      0.94       100
+       Street       0.93      0.99      0.96       100
+       Suburb       1.00      1.00      1.00       100
+Tall building       0.96      0.93      0.94       100
+
+     accuracy                           0.93      1500
+    macro avg       0.93      0.93      0.93      1500
+ weighted avg       0.93      0.93      0.93      1500

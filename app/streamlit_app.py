@@ -6,15 +6,15 @@ import io
 API_URL = "http://localhost:8000"
 
 st.set_page_config(
-    page_title="Práctica Clasificación DL",
+    page_title="DL Classifier",
     page_icon="🏠",
-    layout="centered",
+    layout="wide",
 )
 
-st.title("🏠 Práctica Clasificación DL")
-st.markdown("Sube una imagen para obtener la predicción del modelo.")
+st.title("🏠 DL Classifier")
+st.markdown("Sube una o varias imágenes y el modelo las clasificará automáticamente.")
 
-# ── Sidebar con info ─────────────────────────────────────────
+# ── Sidebar ──────────────────────────────────────────────────
 with st.sidebar:
     if st.button("Recargar modelo"):
         r = requests.post(f"{API_URL}/reload")
@@ -24,30 +24,22 @@ with st.sidebar:
         else:
             st.error("Error al recargar")
 
+    st.divider()
+
     st.header("Modelo en uso")
-    try:
-        import torch
-        from pathlib import Path
-        ck = torch.load(
-            Path(__file__).parent.parent / "models" / "best_model.pth",
-            map_location="cpu"
-        )
-        st.success("Modelo cargado")
-        st.markdown(f"**Run ID:** `{ck.get('run_id', 'desconocido')}`")
-        st.markdown(f"**Backbone:** `{ck.get('backbone', ck['config']['model']['backbone'])}`")
-        st.markdown(f"**Val accuracy:** `{ck.get('val_acc', '?'):.3f}`")
-        st.markdown(f"**Epoch:** `{ck.get('epoch', '?')}`")
-    except Exception as e:
-        st.warning(f"No se pudo leer el checkpoint: {e}")
-    
-    st.header("Estado de la API")
     try:
         response = requests.get(f"{API_URL}/", timeout=3)
         info = response.json()
         st.success("API conectada")
-        st.json(info)
+        st.markdown(f"**Backbone:** `{info['model']}`")
+        st.markdown(f"**Val accuracy:** `{round(info['val_acc'], 3)}`")
+        st.markdown(f"**Run ID:** `{info['run_id']}`")
+        st.markdown(f"**Epoch:** `{info['epoch']}`")
+        st.markdown(f"**Device:** `{info['device']}`")
     except Exception:
         st.error("API no disponible — arranca FastAPI primero")
+
+    st.divider()
 
     st.header("Clases disponibles")
     try:
@@ -57,47 +49,71 @@ with st.sidebar:
     except Exception:
         st.warning("No se pudieron cargar las clases")
 
-# ── Upload ───────────────────────────────────────────────────
-uploaded = st.file_uploader(
-    "Selecciona una imagen",
+# ── Upload múltiple ──────────────────────────────────────────
+uploaded_files = st.file_uploader(
+    "Selecciona una o varias imágenes",
     type=["jpg", "jpeg", "png", "webp"],
+    accept_multiple_files=True,
 )
 
-if uploaded:
-    image = Image.open(uploaded)
-    st.image(image, caption="Imagen subida", use_container_width=True)
+if uploaded_files:
+    st.markdown(f"**{len(uploaded_files)} imagen(es) cargada(s)**")
 
-    if st.button("Clasificar", type="primary"):
-        with st.spinner("Clasificando..."):
+    if st.button("Clasificar todas", type="primary"):
+        results = []
+        errors = []
+
+        progress = st.progress(0, text="Clasificando...")
+
+        for i, uploaded in enumerate(uploaded_files):
             try:
-                # Reenviar imagen a la API
+                image = Image.open(uploaded).convert("RGB")
                 img_bytes = io.BytesIO()
                 image.save(img_bytes, format="JPEG")
                 img_bytes.seek(0)
 
                 response = requests.post(
                     f"{API_URL}/predict",
-                    files={"file": ("image.jpg", img_bytes, "image/jpeg")},
+                    files={"file": (uploaded.name, img_bytes, "image/jpeg")},
                     timeout=10,
                 )
                 response.raise_for_status()
-                result = response.json()
-
+                results.append({
+                    "name": uploaded.name,
+                    "image": image,
+                    "result": response.json(),
+                })
             except requests.exceptions.ConnectionError:
                 st.error("No se puede conectar con la API. ¿Está arrancada?")
                 st.stop()
             except Exception as e:
-                st.error(f"Error en la clasificación: {e}")
-                st.stop()
+                errors.append({"name": uploaded.name, "error": str(e)})
 
-        # ── Resultado principal ──────────────────────────────
-        st.success(f"**{result['prediction']}**")
-        confidence = result["confidence"] * 100
-        st.metric("Confianza", f"{confidence:.1f}%")
+            progress.progress((i + 1) / len(uploaded_files), text=f"Clasificando {i + 1}/{len(uploaded_files)}...")
 
-        # ── Top 5 ────────────────────────────────────────────
-        st.subheader("Top 5 predicciones")
-        for item in result["top5"]:
-            prob = item["probability"] * 100
-            st.markdown(f"**{item['class']}**")
-            st.progress(item["probability"], text=f"{prob:.1f}%")
+        progress.empty()
+
+        # ── Resultados en grid ───────────────────────────────
+        st.subheader(f"Resultados — {len(results)} imagen(es) procesada(s)")
+
+        cols_per_row = 3
+        for row_start in range(0, len(results), cols_per_row):
+            cols = st.columns(cols_per_row)
+            for col, item in zip(cols, results[row_start:row_start + cols_per_row]):
+                with col:
+                    st.image(item["image"], use_column_width=True)
+                    r = item["result"]
+                    confidence = r["confidence"] * 100
+                    st.markdown(f"**{r['prediction']}** — `{confidence:.1f}%`")
+                    st.caption(item["name"])
+                    with st.expander("Top 5"):
+                        for entry in r["top5"]:
+                            prob = entry["probability"] * 100
+                            st.progress(entry["probability"], text=f"{entry['class']} — {prob:.1f}%")
+
+        # ── Errores si los hay ───────────────────────────────
+        if errors:
+            st.divider()
+            st.warning(f"{len(errors)} imagen(es) no se pudieron procesar:")
+            for e in errors:
+                st.markdown(f"- `{e['name']}`: {e['error']}")

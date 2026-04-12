@@ -16,8 +16,8 @@ MODEL_PATH = Path(__file__).parent.parent / "models" / "best_model.pth"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 app = FastAPI(
-    title="Real Estate Image Classifier",
-    description="Clasifica imágenes inmobiliarias en 15 categorías usando EfficientNet.",
+    title="DL Classifier",
+    description="Clasifica imágenes inmobiliarias en 15 categorías usando transfer learning.",
     version="1.0.0",
 )
 
@@ -28,8 +28,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Carga del modelo al arrancar ─────────────────────────────
+# ── Info global del checkpoint cargado ───────────────────────
+checkpoint_info = {}
+
+
+# ── Carga del modelo ─────────────────────────────────────────
 def load_model():
+    global checkpoint_info
+
     if not MODEL_PATH.exists():
         raise FileNotFoundError(f"No se encuentra el modelo en {MODEL_PATH}")
 
@@ -38,16 +44,18 @@ def load_model():
     cfg = checkpoint["config"]
     state_dict = checkpoint["model_state_dict"]
 
-    # Detectar backbone real por número de keys en state_dict
-    num_keys = len(state_dict.keys())
-    if num_keys > 480:
-        backbone = "efficientnet_b2"
-    elif num_keys > 300:
-        backbone = "efficientnet_b0"
-    else:
-        backbone = "mobilenet_v3_small"
+    # Leer backbone guardado, con detección automática como fallback
+    backbone = checkpoint.get("backbone")
+    if not backbone:
+        num_keys = len(state_dict.keys())
+        if num_keys > 480:
+            backbone = "efficientnet_b2"
+        elif num_keys > 300:
+            backbone = "efficientnet_b0"
+        else:
+            backbone = "mobilenet_v3_small"
 
-    print(f"Backbone detectado: {backbone} ({num_keys} keys)")
+    print(f"Cargando backbone: {backbone} ({len(state_dict.keys())} keys)")
 
     model = build_model(
         backbone=backbone,
@@ -59,9 +67,18 @@ def load_model():
     model.to(DEVICE)
     model.eval()
 
+    checkpoint_info = {
+        "backbone":  backbone,
+        "val_acc":  round(float(checkpoint.get("val_acc", 0)), 4),
+        "run_id":    checkpoint.get("run_id", "unknown"),
+        "epoch":     checkpoint.get("epoch", "unknown"),
+    }
+
     return model, class_names, cfg["data"]["image_size"]
 
+
 model, CLASS_NAMES, IMAGE_SIZE = load_model()
+
 
 # ── Transform de inferencia ──────────────────────────────────
 def get_inference_transform(image_size: int):
@@ -81,15 +98,20 @@ transform = get_inference_transform(IMAGE_SIZE)
 @app.get("/", summary="Health check")
 def root():
     return {
-        "status": "ok",
-        "model": "EfficientNet-B0",
-        "classes": len(CLASS_NAMES),
-        "device": str(DEVICE),
+        "status":   "ok",
+        "model":    checkpoint_info.get("backbone", "unknown"),
+        "val_acc":  checkpoint_info.get("val_acc", "unknown"),
+        "run_id":   checkpoint_info.get("run_id", "unknown"),
+        "epoch":    checkpoint_info.get("epoch", "unknown"),
+        "classes":  len(CLASS_NAMES),
+        "device":   str(DEVICE),
     }
+
 
 @app.get("/classes", summary="Lista de clases disponibles")
 def get_classes():
     return {"classes": CLASS_NAMES}
+
 
 @app.post("/reload", summary="Recarga el modelo desde disco")
 def reload_model():
@@ -97,9 +119,16 @@ def reload_model():
     try:
         model, CLASS_NAMES, IMAGE_SIZE = load_model()
         transform = get_inference_transform(IMAGE_SIZE)
-        return {"status": "ok", "message": "Modelo recargado correctamente"}
+        return {
+            "status":  "ok",
+            "message": "Modelo recargado correctamente",
+            "model":   checkpoint_info.get("backbone"),
+            "val_acc": checkpoint_info.get("val_acc"),
+            "run_id":  checkpoint_info.get("run_id"),
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/predict", summary="Clasifica una imagen")
 async def predict(file: UploadFile = File(...)):
@@ -131,7 +160,7 @@ async def predict(file: UploadFile = File(...)):
         "confidence": round(probs.max().item(), 4),
         "top5": [
             {
-                "class": CLASS_NAMES[idx.item()],
+                "class":       CLASS_NAMES[idx.item()],
                 "probability": round(prob.item(), 4),
             }
             for prob, idx in zip(top5_probs, top5_idx)

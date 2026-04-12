@@ -101,7 +101,7 @@ Training runs in two phases:
 - **Phase 1** — backbone frozen, only the classification head is trained (`epochs_phase1` epochs, `lr_phase1`)
 - **Phase 2** — full network unfrozen, fine-tuned at a lower learning rate (`epochs_phase2` epochs, `lr_phase2`)
 
-The best checkpoint by validation accuracy is saved to `models/best_model.pth`. If it is the best run seen so far across all runs, it also updates the global best.
+The best checkpoint by validation accuracy is saved to `models/best_model.pth`. If it beats the current global best across all runs, it also updates the global best.
 
 ### Hyperparameter sweep (W&B Bayesian optimisation)
 
@@ -120,6 +120,34 @@ wandb agent your_username/DL-classifier/<sweep_id>
 
 The sweep searches over backbone, dropout, learning rates, label smoothing, and batch size using Bayesian optimisation. Each run saves its own checkpoint to `models/model_<run_id>.pth` and updates `models/best_model.pth` only if it beats the current global best.
 
+If the sweep configuration changes (e.g. new backbones added), create a new sweep — existing runs are preserved in W&B.
+
+### Supported backbones
+
+| Backbone | Params | Notes |
+|----------|--------|-------|
+| `efficientnet_b0` | 4.0M | Lightweight, strong baseline |
+| `efficientnet_b2` | 7.7M | Better accuracy, moderate cost |
+| `efficientnet_b3` | 10.7M | Good balance for this dataset size |
+| `efficientnet_b4` | 17.6M | Heavier, may overfit with few images |
+| `convnext_tiny` | 28.6M | Modern architecture, strong transfer learning |
+| `convnext_small` | 50.2M | Larger ConvNeXt variant |
+
+### Recovering a checkpoint from a previous run
+
+If a better run was overwritten, checkpoints can be recovered in two ways:
+
+**From local W&B files:**
+```bash
+dir "...\DL_Classifier\src\wandb" /s /b | findstr "best_model.pth"
+```
+Then copy the relevant file:
+```bash
+copy "...\wandb\run-<id>\files\best_model.pth" "...\models\best_model.pth"
+```
+
+**From W&B cloud:** go to the run in [wandb.ai](https://wandb.ai) -> Files tab -> download `best_model.pth`.
+
 ---
 
 ## Configuration reference
@@ -128,7 +156,7 @@ Edit `src/config.yaml` to change any training parameter:
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `model.backbone` | `efficientnet_b0` | Backbone architecture (`efficientnet_b0`, `efficientnet_b2`, `mobilenet_v3_small`, `resnet50`) |
+| `model.backbone` | `efficientnet_b0` | Backbone architecture (see supported backbones above) |
 | `model.dropout` | `0.4` | Dropout rate before the classifier head |
 | `model.pretrained` | `true` | Use ImageNet pretrained weights |
 | `data.batch_size` | `32` | Batch size (reduce to `16` if GPU OOM) |
@@ -201,11 +229,19 @@ After replacing `models/best_model.pth` with a better checkpoint, reload the API
 curl -X POST http://localhost:8000/reload
 ```
 
-Or use the **Reload model** button in the Streamlit sidebar.
+Or use the **Recargar modelo** button in the Streamlit sidebar.
 
-### Identifying the active model
+### Streamlit sidebar
 
-The Streamlit sidebar shows the run ID, backbone, validation accuracy, and epoch of the checkpoint currently loaded by the API — useful when running multiple sweep experiments.
+The sidebar shows at all times:
+
+- Active backbone, val accuracy, run ID and epoch of the model currently loaded by the API
+- List of available classes
+- Reload button to hot-swap the model without restarting
+
+### Classifying multiple images
+
+The app supports uploading and classifying multiple images at once. Results are displayed in a 3-column grid with confidence score and a Top 5 expandable panel per image.
 
 ---
 
@@ -250,8 +286,6 @@ The Streamlit sidebar shows the run ID, backbone, validation accuracy, and epoch
 Experiments, sweep runs, and confusion matrices are tracked at:
 
 `https://wandb.ai/your_username/DL-classifier`
-
-Reviewers: `agascon@comillas.edu` and `rkramer@comillas.edu` have been invited to the workspace.
 
 ---
 

@@ -24,19 +24,32 @@ def build_model(backbone: str, num_classes: int, pretrained: bool, dropout: floa
             nn.Linear(in_features, num_classes),
         )
 
-    elif backbone == "mobilenet_v3_small":
-        model = models.mobilenet_v3_small(weights=weights)
-        in_features = model.classifier[3].in_features
-        model.classifier[3] = nn.Linear(in_features, num_classes)
-
-    elif backbone == "resnet50":
-        model = models.resnet50(weights=weights)
-        in_features = model.fc.in_features
-        model.fc = nn.Sequential(
+    elif backbone == "efficientnet_b3":
+        model = models.efficientnet_b3(weights=weights)
+        in_features = model.classifier[1].in_features
+        model.classifier = nn.Sequential(
             nn.Dropout(dropout),
             nn.Linear(in_features, num_classes),
         )
 
+    elif backbone == "efficientnet_b4":
+        model = models.efficientnet_b4(weights=weights)
+        in_features = model.classifier[1].in_features
+        model.classifier = nn.Sequential(
+            nn.Dropout(dropout),
+            nn.Linear(in_features, num_classes),
+        )    
+
+    elif backbone == "convnext_tiny":
+        model = models.convnext_tiny(weights=weights)
+        in_features = model.classifier[2].in_features
+        model.classifier[2] = nn.Linear(in_features, num_classes)
+
+    elif backbone == "convnext_small":
+        model = models.convnext_small(weights=weights)
+        in_features = model.classifier[2].in_features
+        model.classifier[2] = nn.Linear(in_features, num_classes)
+    
     else:
         raise ValueError(f"Backbone '{backbone}' no soportado. Opciones: {SUPPORTED_BACKBONES}")
 
