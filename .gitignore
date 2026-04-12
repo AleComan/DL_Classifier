@@ -8,11 +8,13 @@ __pycache__/
 .env
 *.env
 
-# Modelos (son demasiado grandes para git)
+# Modelos — ignorar todo excepto la carpeta final
 models/*.pth
+models/model_*.pth
 
 # W&B
 wandb/
+wandb/*
 
 # Jupyter
 .ipynb_checkpoints/
