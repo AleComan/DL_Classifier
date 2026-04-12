@@ -1,4 +1,4 @@
-# Real Estate Image Classifier
+# DL Classifier
 
 A deep learning system for automatic classification of real estate images into 15 scene categories. Built with PyTorch (EfficientNet transfer learning), tracked with Weights & Biases, and deployed via a FastAPI + Streamlit stack.
 
@@ -7,7 +7,7 @@ A deep learning system for automatic classification of real estate images into 1
 ## Project structure
 
 ```
-real-estate-classifier/
+DL-classifier/
 │
 ├── data/
 │   ├── train/              # Training images organised by class folder
@@ -109,13 +109,13 @@ Create the sweep once:
 
 ```bash
 cd src
-wandb sweep --project real-estate-classifier sweep.yaml
+wandb sweep --project DL-classifier sweep.yaml
 ```
 
 Then launch the agent (stop anytime with Ctrl+C):
 
 ```bash
-wandb agent your_username/real-estate-classifier/<sweep_id>
+wandb agent your_username/DL-classifier/<sweep_id>
 ```
 
 The sweep searches over backbone, dropout, learning rates, label smoothing, and batch size using Bayesian optimisation. Each run saves its own checkpoint to `models/model_<run_id>.pth` and updates `models/best_model.pth` only if it beats the current global best.
@@ -264,7 +264,7 @@ The Streamlit sidebar shows the run ID, backbone, validation accuracy, and epoch
 
 Experiments, sweep runs, and confusion matrices are tracked at:
 
-`https://wandb.ai/your_username/real-estate-classifier`
+`https://wandb.ai/your_username/DL-classifier`
 
 Reviewers: `agascon@comillas.edu` and `rkramer@comillas.edu` have been invited to the workspace.
 
