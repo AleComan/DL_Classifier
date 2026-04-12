@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Entornos
+.env
+*.env
+
+# Modelos (son demasiado grandes para git)
+models/*.pth
+
+# W&B
+wandb/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db
+desktop.ini
