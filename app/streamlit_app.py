@@ -6,16 +6,40 @@ import io
 API_URL = "http://localhost:8000"
 
 st.set_page_config(
-    page_title="Real Estate Classifier",
+    page_title="Práctica Clasificación DL",
     page_icon="🏠",
     layout="centered",
 )
 
-st.title("🏠 Real Estate Image Classifier")
-st.markdown("Sube una imagen inmobiliaria y el modelo la clasificará automáticamente.")
+st.title("🏠 Práctica Clasificación DL")
+st.markdown("Sube una imagen para obtener la predicción del modelo.")
 
 # ── Sidebar con info ─────────────────────────────────────────
 with st.sidebar:
+    if st.button("Recargar modelo"):
+        r = requests.post(f"{API_URL}/reload")
+        if r.ok:
+            st.success("Modelo recargado")
+            st.rerun()
+        else:
+            st.error("Error al recargar")
+
+    st.header("Modelo en uso")
+    try:
+        import torch
+        from pathlib import Path
+        ck = torch.load(
+            Path(__file__).parent.parent / "models" / "best_model.pth",
+            map_location="cpu"
+        )
+        st.success("Modelo cargado")
+        st.markdown(f"**Run ID:** `{ck.get('run_id', 'desconocido')}`")
+        st.markdown(f"**Backbone:** `{ck.get('backbone', ck['config']['model']['backbone'])}`")
+        st.markdown(f"**Val accuracy:** `{ck.get('val_acc', '?'):.3f}`")
+        st.markdown(f"**Epoch:** `{ck.get('epoch', '?')}`")
+    except Exception as e:
+        st.warning(f"No se pudo leer el checkpoint: {e}")
+    
     st.header("Estado de la API")
     try:
         response = requests.get(f"{API_URL}/", timeout=3)

@@ -73,7 +73,11 @@ def plot_confusion_matrix(labels, preds, class_names, save_path):
 
 def run_phase(phase, model, loaders, criterion, optimizer, scheduler,
               epochs, device, class_names, cfg, save_path):
-    """Ejecuta un bloque de entrenamiento completo (fase 1 o 2)."""
+    
+    # Usar el ID de W&B para identificar la run
+    run_id = wandb.run.id
+    run_save_path = save_path.parent / f"model_{run_id}.pth"
+    
     best_val_acc = 0.0
     best_preds, best_labels = [], []
 
@@ -100,7 +104,6 @@ def run_phase(phase, model, loaders, criterion, optimizer, scheduler,
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             best_preds, best_labels = preds, labels
-            # En run_phase(), donde llamas a torch.save:
             torch.save({
                 "epoch": epoch,
                 "phase": phase,
@@ -108,12 +111,25 @@ def run_phase(phase, model, loaders, criterion, optimizer, scheduler,
                 "val_acc": val_acc,
                 "class_names": class_names,
                 "backbone": wandb.config.get("model.backbone", cfg["model"]["backbone"]),
+                "run_id": run_id,
                 "config": cfg,
-            }, save_path)
-            print(f"    ✓ Mejor modelo guardado (val_acc={val_acc:.3f})")
+            }, run_save_path)
+            # También actualizar best_model.pth si es el mejor global
+            _update_global_best(run_save_path, save_path, val_acc)
+            print(f"    ✓ Mejor modelo guardado (val_acc={val_acc:.3f}) → {run_save_path.name}")
 
     return best_val_acc, best_preds, best_labels
 
+
+def _update_global_best(candidate_path, global_path, candidate_acc):
+    """Sobreescribe best_model.pth solo si esta run es mejor que todas las anteriores."""
+    if global_path.exists():
+        existing = torch.load(global_path, map_location="cpu")
+        if existing.get("val_acc", 0) >= candidate_acc:
+            return  # el global ya es mejor, no tocar
+    import shutil
+    shutil.copy2(candidate_path, global_path)
+    print(f"    ★ Nuevo mejor modelo global (val_acc={candidate_acc:.3f})")
 
 def main():
     # ── Config base desde YAML ───────────────────────────────

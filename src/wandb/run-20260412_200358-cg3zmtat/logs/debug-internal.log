@@ -1,0 +1,15 @@
+{"time":"2026-04-12T20:04:00.8965513+02:00","level":"INFO","msg":"wandb-core"}
+{"time":"2026-04-12T20:04:00.8982371+02:00","level":"INFO","msg":"stream: starting","core version":"0.25.1"}
+{"time":"2026-04-12T20:04:01.1585972+02:00","level":"INFO","msg":"stream: created new stream","id":"cg3zmtat"}
+{"time":"2026-04-12T20:04:01.1585972+02:00","level":"INFO","msg":"handler: started"}
+{"time":"2026-04-12T20:04:01.1599512+02:00","level":"INFO","msg":"stream: started"}
+{"time":"2026-04-12T20:04:01.1599512+02:00","level":"INFO","msg":"writer: started","stream_id":"cg3zmtat"}
+{"time":"2026-04-12T20:04:01.1599512+02:00","level":"INFO","msg":"sender: started"}
+{"time":"2026-04-12T20:04:01.6202084+02:00","level":"INFO","msg":"filestream: sending request","total_files":1,"console_offset":0,"console_lines":2}
+{"time":"2026-04-12T20:04:01.8438767+02:00","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-12T20:04:16.4574274+02:00","level":"ERROR","msg":"monitor: error sampling metrics: process does not exist"}
+{"time":"2026-04-12T20:04:16.6208911+02:00","level":"INFO","msg":"filestream: sending request","total_files":2,"events_offset":0,"events_lines":1,"console_offset":2,"console_lines":5,"uploaded_len":2}
+{"time":"2026-04-12T20:04:16.7527139+02:00","level":"ERROR","msg":"api: HTTP error","status":404,"method":"POST","url":"https://api.wandb.ai/files/202513902-universidad-pontificia-comillas/DL-classifier/cg3zmtat/file_stream"}
+{"time":"2026-04-12T20:04:16.7527139+02:00","level":"ERROR+4","msg":"filestream: fatal error: filestream: failed to upload: 404 Not Found url=https://api.wandb.ai/files/202513902-universidad-pontificia-comillas/DL-classifier/cg3zmtat/file_stream: {\"error\":\"run DL-classifier/cg3zmtat not found while streaming file\"}"}
+{"time":"2026-04-12T20:04:31.457763+02:00","level":"ERROR","msg":"monitor: error sampling metrics: process does not exist"}
+{"time":"2026-04-12T20:04:46.4591953+02:00","level":"ERROR","msg":"monitor: error sampling metrics: process does not exist"}

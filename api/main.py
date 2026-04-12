@@ -87,11 +87,19 @@ def root():
         "device": str(DEVICE),
     }
 
-
 @app.get("/classes", summary="Lista de clases disponibles")
 def get_classes():
     return {"classes": CLASS_NAMES}
 
+@app.post("/reload", summary="Recarga el modelo desde disco")
+def reload_model():
+    global model, CLASS_NAMES, IMAGE_SIZE, transform
+    try:
+        model, CLASS_NAMES, IMAGE_SIZE = load_model()
+        transform = get_inference_transform(IMAGE_SIZE)
+        return {"status": "ok", "message": "Modelo recargado correctamente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/predict", summary="Clasifica una imagen")
 async def predict(file: UploadFile = File(...)):
