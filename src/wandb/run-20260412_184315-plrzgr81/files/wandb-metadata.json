@@ -1,0 +1,44 @@
+{
+  "os": "Windows-10-10.0.26200-SP0",
+  "python": "CPython 3.10.20",
+  "startedAt": "2026-04-12T16:43:15.571951Z",
+  "args": [
+    "--data.batch_size=16",
+    "--model.backbone=efficientnet_b2",
+    "--model.dropout=0.3",
+    "--train.label_smoothing=0.1",
+    "--train.lr_phase1=0.001",
+    "--train.lr_phase2=0.0001"
+  ],
+  "program": "C:\\Users\\aleja\\Documents\\Comillas\\2º Cuatri\\Machine Learning II\\Chapter 5. Deep Learning\\DL_Classifier\\src\\train.py",
+  "codePath": "train.py",
+  "codePathLocal": "train.py",
+  "email": "202513902@alu.comillas.edu",
+  "root": "C:\\Users\\aleja\\Documents\\Comillas\\2º Cuatri\\Machine Learning II\\Chapter 5. Deep Learning\\DL_Classifier\\src",
+  "host": "aleecv",
+  "executable": "C:\\Users\\aleja\\anaconda3\\envs\\DL\\python.exe",
+  "cpu_count": 20,
+  "cpu_count_logical": 28,
+  "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1018843623424",
+      "used": "886777008128"
+    }
+  },
+  "memory": {
+    "total": "31901671424"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+      "memoryTotal": "8585740288",
+      "cudaCores": 4608,
+      "architecture": "Ada",
+      "uuid": "GPU-8ee0c8c3-f156-5f74-7022-a907210975a1"
+    }
+  ],
+  "cudaVersion": "13.0",
+  "writerId": "1q52g23uxna561nngnyu8y8cedm2cboi"
+}

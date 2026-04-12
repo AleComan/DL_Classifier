@@ -1,0 +1,14 @@
+wandb_version: 1
+
+data.batch_size:
+  value: 16
+model.backbone:
+  value: efficientnet_b2
+model.dropout:
+  value: 0.3
+train.label_smoothing:
+  value: 0.1
+train.lr_phase1:
+  value: 0.001
+train.lr_phase2:
+  value: 0.0001

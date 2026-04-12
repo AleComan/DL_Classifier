@@ -1,0 +1,24 @@
+data:
+  data_dir: "../dataset"
+  image_size: 224
+  batch_size: 32
+  num_workers: 0          # Windows: siempre 0
+
+model:
+  backbone: "efficientnet_b0"
+  pretrained: true
+  dropout: 0.4            # algo alto porque el dataset es pequeño
+
+train:
+  epochs_phase1: 10       # solo clasificador congelado
+  epochs_phase2: 20       # fine-tuning completo, lr bajo
+  lr_phase1: 0.001
+  lr_phase2: 0.0001
+  weight_decay: 0.0001
+  label_smoothing: 0.1    # ayuda con datasets pequeños
+
+wandb:
+  project: "DL-classifier"
+  entity: "202513902-universidad-pontificia-comillas"      
+  run_name: null          # null = nombre automático
+  mode: "online"

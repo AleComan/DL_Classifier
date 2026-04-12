@@ -1,0 +1,46 @@
+
+Dispositivo: cuda
+GPU: NVIDIA GeForce RTX 4070 Laptop GPU
+Clases (15): ['Bedroom', 'Coast', 'Forest', 'Highway', 'Industrial', 'Inside city', 'Kitchen', 'Living room', 'Mountain', 'Office', 'Open country', 'Store', 'Street', 'Suburb', 'Tall building']
+
+Downloading: "https://download.pytorch.org/models/efficientnet_b2_rwightman-c35c1473.pth" to C:\Users\aleja/.cache\torch\hub\checkpoints\efficientnet_b2_rwightman-c35c1473.pth
+100.0%
+── FASE 1: Entrenando solo el clasificador ──
+  Parámetros congelados: 207
+  [Fase 1] Epoch 01/10 | train_loss=1.5167 train_acc=0.676 | val_loss=0.8709 val_acc=0.924
+    ✓ Mejor modelo guardado (val_acc=0.924)
+  [Fase 1] Epoch 02/10 | train_loss=0.9881 train_acc=0.858 | val_loss=0.7900 val_acc=0.943
+    ✓ Mejor modelo guardado (val_acc=0.943)
+  [Fase 1] Epoch 03/10 | train_loss=0.9204 train_acc=0.883 | val_loss=0.7630 val_acc=0.953
+    ✓ Mejor modelo guardado (val_acc=0.953)
+  [Fase 1] Epoch 04/10 | train_loss=0.8655 train_acc=0.910 | val_loss=0.7554 val_acc=0.947
+  [Fase 1] Epoch 05/10 | train_loss=0.8389 train_acc=0.922 | val_loss=0.7548 val_acc=0.953
+  [Fase 1] Epoch 06/10 | train_loss=0.8009 train_acc=0.935 | val_loss=0.7391 val_acc=0.960
+    ✓ Mejor modelo guardado (val_acc=0.960)
+  [Fase 1] Epoch 07/10 | train_loss=0.7843 train_acc=0.943 | val_loss=0.7359 val_acc=0.960
+  [Fase 1] Epoch 08/10 | train_loss=0.7671 train_acc=0.946 | val_loss=0.7202 val_acc=0.961
+    ✓ Mejor modelo guardado (val_acc=0.961)
+  [Fase 1] Epoch 09/10 | train_loss=0.7537 train_acc=0.950 | val_loss=0.7222 val_acc=0.959
+  [Fase 1] Epoch 10/10 | train_loss=0.7374 train_acc=0.959 | val_loss=0.7221 val_acc=0.962
+    ✓ Mejor modelo guardado (val_acc=0.962)
+
+── FASE 2: Fine-tuning completo ──
+  Parámetros entrenables: 7,722,129
+  [Fase 2] Epoch 01/20 | train_loss=0.7670 train_acc=0.951 | val_loss=0.7222 val_acc=0.962
+    ✓ Mejor modelo guardado (val_acc=0.962)
+  [Fase 2] Epoch 02/20 | train_loss=0.7470 train_acc=0.956 | val_loss=0.7235 val_acc=0.959
+  [Fase 2] Epoch 03/20 | train_loss=0.7239 train_acc=0.964 | val_loss=0.7310 val_acc=0.959
+  [Fase 2] Epoch 04/20 | train_loss=0.7334 train_acc=0.958 | val_loss=0.7296 val_acc=0.957
+  [Fase 2] Epoch 05/20 | train_loss=0.7097 train_acc=0.973 | val_loss=0.7258 val_acc=0.955
+  [Fase 2] Epoch 06/20 | train_loss=0.6867 train_acc=0.978 | val_loss=0.7233 val_acc=0.957
+  [Fase 2] Epoch 07/20 | train_loss=0.6933 train_acc=0.975 | val_loss=0.7275 val_acc=0.953
+  [Fase 2] Epoch 08/20 | train_loss=0.6867 train_acc=0.978 | val_loss=0.7143 val_acc=0.959
+  [Fase 2] Epoch 09/20 | train_loss=0.6720 train_acc=0.985 | val_loss=0.7134 val_acc=0.961
+  [Fase 2] Epoch 10/20 | train_loss=0.6782 train_acc=0.982 | val_loss=0.7119 val_acc=0.961
+  [Fase 2] Epoch 11/20 | train_loss=0.6643 train_acc=0.990 | val_loss=0.7172 val_acc=0.957
+  [Fase 2] Epoch 12/20 | train_loss=0.6670 train_acc=0.987 | val_loss=0.7046 val_acc=0.963
+    ✓ Mejor modelo guardado (val_acc=0.963)
+  [Fase 2] Epoch 13/20 | train_loss=0.6585 train_acc=0.992 | val_loss=0.7084 val_acc=0.961
+  [Fase 2] Epoch 14/20 | train_loss=0.6621 train_acc=0.988 | val_loss=0.7156 val_acc=0.960
+  [Fase 2] Epoch 15/20 | train_loss=0.6573 train_acc=0.991 | val_loss=0.7069 val_acc=0.957
+  [Fase 2] Epoch 16/20 | train_loss=0.6610 train_acc=0.988 | val_loss=0.7043 val_acc=0.958
