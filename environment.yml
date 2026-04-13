@@ -5,15 +5,31 @@ dependencies:
   - python=3.10
   - pip
   - pip:
+<<<<<<< HEAD
     - torch torchvision --index-url https://download.pytorch.org/whl/cu118
     - wandb
+=======
+    # GPU: reemplaza la linea de torch por:
+    # - torch torchvision --index-url https://download.pytorch.org/whl/cu126
+    - torch torchvision --index-url https://download.pytorch.org/whl/cpu
+    - wandb
+    - fastapi
+    - uvicorn[standard]
+    - streamlit
+    - requests
+    - pillow
+>>>>>>> 662970cb9853eaef9c0e7dd92e03b3d68aa85e04
     - pyyaml
     - scikit-learn
     - matplotlib
     - seaborn
+<<<<<<< HEAD
     - ipykernel
     - fastapi 
     - uvicorn[standard] 
     - streamlit 
     - requests 
     - pillow
+=======
+    - python-multipart
+>>>>>>> 662970cb9853eaef9c0e7dd92e03b3d68aa85e04
