@@ -5,16 +5,18 @@ dependencies:
   - python=3.10
   - pip
   - pip:
-    - torch torchvision --index-url https://download.pytorch.org/whl/cu118
-    - wandb
-    - pyyaml
-    - scikit-learn
-    - matplotlib
-    - seaborn
-    - ipykernel
-    - fastapi 
-    - uvicorn[standard] 
-    - streamlit 
-    - requests 
-    - pillow
-    - python-multipart
+      - --extra-index-url https://download.pytorch.org/whl/cu118
+      - torch
+      - torchvision
+      - wandb
+      - pyyaml
+      - scikit-learn
+      - matplotlib
+      - seaborn
+      - ipykernel
+      - fastapi
+      - uvicorn[standard]
+      - streamlit
+      - requests
+      - pillow
+      - python-multipart
