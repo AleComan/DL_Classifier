@@ -17,3 +17,4 @@ dependencies:
     - streamlit 
     - requests 
     - pillow
+    - python-multipart
