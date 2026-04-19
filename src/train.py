@@ -73,11 +73,10 @@ def plot_confusion_matrix(labels, preds, class_names, save_path):
 
 def run_phase(phase, model, loaders, criterion, optimizer, scheduler,
               epochs, device, class_names, cfg, save_path):
-    
-    # Usar el ID de W&B para identificar la run
+
     run_id = wandb.run.id
     run_save_path = save_path.parent / f"model_{run_id}.pth"
-    
+
     best_val_acc = 0.0
     best_preds, best_labels = [], []
 
@@ -104,17 +103,20 @@ def run_phase(phase, model, loaders, criterion, optimizer, scheduler,
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             best_preds, best_labels = preds, labels
+
+            backbone = wandb.config.get("model.backbone", cfg["model"]["backbone"])
+
+            # ── Checkpoint compatible con modelo simple y ensamble ──
             torch.save({
                 "epoch": epoch,
                 "phase": phase,
-                "model_state_dict": model.state_dict(),
+                "model_state_dict": model.state_dict(),   # funciona igual para EnsembleModel
                 "val_acc": val_acc,
                 "class_names": class_names,
-                "backbone": wandb.config.get("model.backbone", cfg["model"]["backbone"]),
+                "backbone": backbone,
                 "run_id": run_id,
                 "config": cfg,
             }, run_save_path)
-            # También actualizar best_model.pth si es el mejor global
             _update_global_best(run_save_path, save_path, val_acc)
             print(f"    ✓ Mejor modelo guardado (val_acc={val_acc:.3f}) → {run_save_path.name}")
 
@@ -126,17 +128,18 @@ def _update_global_best(candidate_path, global_path, candidate_acc):
     if global_path.exists():
         existing = torch.load(global_path, map_location="cpu")
         if existing.get("val_acc", 0) >= candidate_acc:
-            return  # el global ya es mejor, no tocar
+            return
     import shutil
     shutil.copy2(candidate_path, global_path)
     print(f"    ★ Nuevo mejor modelo global (val_acc={candidate_acc:.3f})")
+
 
 def main():
     # ── Config base desde YAML ───────────────────────────────
     with open("config.yaml") as f:
         cfg = yaml.safe_load(f)
 
-    # ── Init W&B (el sweep sobreescribe cfg si está activo) ──
+    # ── Init W&B ─────────────────────────────────────────────
     wandb.init(
         project=cfg["wandb"]["project"],
         entity=cfg["wandb"]["entity"],
@@ -145,16 +148,11 @@ def main():
         config=cfg,
     )
 
-    # Leer config final (puede haber sido sobreescrita por sweep)
     wcfg = wandb.config
 
-    # Reconstruir cfg anidado desde wandb.config (que es plano con claves "a.b")
     def get(key, default=None):
-        # intenta primero la clave con punto (formato sweep), luego anidada
-        flat_key = key.replace(".", "_")  # wandb a veces aplana con _
         if key in wcfg:
             return wcfg[key]
-        # navegar el dict anidado original
         parts = key.split(".")
         val = cfg
         for p in parts:
@@ -179,8 +177,9 @@ def main():
     print(f"Clases ({num_classes}): {class_names}\n")
 
     # ── Modelo ───────────────────────────────────────────────
+    backbone = get("model.backbone")
     model = build_model(
-        get("model.backbone"),
+        backbone,
         num_classes,
         get("model.pretrained"),
         get("model.dropout"),
@@ -198,7 +197,7 @@ def main():
 
     # ── Fase 1 ───────────────────────────────────────────────
     print("── FASE 1: Entrenando solo el clasificador ──")
-    freeze_backbone(model, get("model.backbone"))
+    freeze_backbone(model, backbone)
 
     optimizer1 = optim.AdamW(
         filter(lambda p: p.requires_grad, model.parameters()),
@@ -247,6 +246,7 @@ def main():
 
     wandb.finish()
     print(f"\nModelo guardado en: {save_path}")
+
 
 if __name__ == "__main__":
     main()

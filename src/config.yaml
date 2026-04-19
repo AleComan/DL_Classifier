@@ -5,7 +5,7 @@ data:
   num_workers: 0          # Windows: siempre 0
 
 model:
-  backbone: "efficientnet_b0"
+  backbone: "ensemble_convnext_small_efficientnet_b2"
   pretrained: true
   dropout: 0.4            # algo alto porque el dataset es pequeño
 
