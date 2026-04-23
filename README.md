@@ -1,6 +1,6 @@
 # DL Classifier
 
-A deep learning system for automatic classification of real estate images into 15 scene categories. The final model is a **soft-voting ensemble** of **EfficientNet-B2** and **ConvNeXt-Small**, achieving **~97.67% overall accuracy** on the validation set. Built with PyTorch, tracked with Weights & Biases, and deployed via a FastAPI + Streamlit stack.
+A deep learning system for automatic classification of real estate images into 15 scene categories. The final model is a **soft-voting ensemble** of **EfficientNet-B2** and **ConvNeXt-Small**, achieving **~97.8% overall accuracy** on the validation set. Built with PyTorch, tracked with Weights & Biases, and deployed via a FastAPI + Streamlit stack.
 
 ---
 
@@ -143,7 +143,7 @@ After completing the hyperparameter sweep, the two best-performing checkpoints w
 |-------|---------------------------|
 | EfficientNet-B2 | ~97% |
 | ConvNeXt-Small | ~98% |
-| **Ensemble (avg logits)** | **~97.9%** |
+| **Ensemble (avg logits)** | **~97.8%** |
 
 The ensemble averages the raw softmax probabilities from both models before taking the argmax. Neither model needs to be retrained — the two `best_model.pth` checkpoints are loaded simultaneously at inference time.
 
@@ -273,7 +273,7 @@ Results correspond to the **EfficientNet-B2 + ConvNeXt-Small ensemble** evaluate
 
 | Metric | Value |
 |--------|-------|
-| Overall accuracy (ensemble) | **97.67%** |
+| Overall accuracy (ensemble) | **97.8%** |
 | Best individual backbone | `convnext_small` |
 | Ensemble strategy | Soft voting (average softmax probabilities) |
 
