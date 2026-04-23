@@ -14,6 +14,13 @@ st.set_page_config(
 # ── Custom CSS ────────────────────────────────────────────────
 st.markdown("""
 <style>
+    /* Forzar esquema de color claro en todo el app para evitar
+       que Firefox/SO en modo oscuro invierta los colores */
+    html, body, [data-testid="stAppViewContainer"],
+    [data-testid="stApp"] {
+        color-scheme: light !important;
+    }
+
     /* Centrar y limitar ancho del contenido principal */
     .block-container {
         max-width: 700px !important;
@@ -61,6 +68,7 @@ st.markdown("""
 
     /* Tarjeta de resultado */
     .result-card {
+        color-scheme: light;
         background: #ffffff;
         border: 1px solid #e5e7eb;
         border-radius: 12px;
@@ -100,11 +108,38 @@ st.markdown("""
 
     /* Sidebar más limpio */
     [data-testid="stSidebar"] {
+        color-scheme: light;
         background-color: #f9fafb;
     }
     [data-testid="stSidebar"] .stMarkdown p {
         font-size: 0.85rem;
         text-align: left;
+    }
+    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+        text-align: left;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Info rows in sidebar */
+    .info-table {
+        color-scheme: light;
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+    }
+    .info-table td { padding: 4px 2px; vertical-align: top; }
+    .info-table td:first-child {
+        color: #6b7280;
+        white-space: nowrap;
+        padding-right: 8px;
+        font-weight: 500;
+    }
+    .info-table td:last-child {
+        color: #111827;
+        font-weight: 600;
+        word-break: break-all;
     }
 
     /* Botón primario */
@@ -133,11 +168,19 @@ with st.sidebar:
         response = requests.get(f"{API_URL}/", timeout=3)
         info = response.json()
         st.success("API conectada")
-        st.markdown(f"**Backbone:** `{info['model']}`")
-        st.markdown(f"**Val accuracy:** `{round(info['val_acc'], 3)}`")
-        st.markdown(f"**Run ID:** `{info['run_id']}`")
-        st.markdown(f"**Epoch:** `{info['epoch']}`")
-        st.markdown(f"**Device:** `{info['device']}`")
+        val_acc_pct = f"{info['val_acc'] * 100:.2f}%" if info.get('val_acc') else "—"
+        st.markdown(
+            f"""
+            <table class="info-table">
+              <tr><td>Backbone</td><td>{info.get('model', '—')}</td></tr>
+              <tr><td>Val acc</td><td>{val_acc_pct}</td></tr>
+              <tr><td>Run ID</td><td>{info.get('run_id', '—')}</td></tr>
+              <tr><td>Epoch</td><td>{info.get('epoch', '—')}</td></tr>
+              <tr><td>Device</td><td>{info.get('device', '—')}</td></tr>
+            </table>
+            """,
+            unsafe_allow_html=True,
+        )
     except Exception:
         st.error("API no disponible — arranca FastAPI primero")
 

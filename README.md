@@ -1,6 +1,6 @@
 # DL Classifier
 
-A deep learning system for automatic classification of real estate images into 15 scene categories. Built with PyTorch (EfficientNet transfer learning), tracked with Weights & Biases, and deployed via a FastAPI + Streamlit stack.
+A deep learning system for automatic classification of real estate images into 15 scene categories. The final model is a **soft-voting ensemble** of **EfficientNet-B2** and **ConvNeXt-Small**, achieving **~97.67% overall accuracy** on the validation set. Built with PyTorch, tracked with Weights & Biases, and deployed via a FastAPI + Streamlit stack.
 
 ---
 
@@ -127,11 +127,31 @@ If the sweep configuration changes (e.g. new backbones added), create a new swee
 | Backbone | Params | Notes |
 |----------|--------|-------|
 | `efficientnet_b0` | 4.0M | Lightweight, strong baseline |
-| `efficientnet_b2` | 7.7M | Better accuracy, moderate cost |
+| `efficientnet_b2` | 7.7M | **Final ensemble member** — best accuracy/cost balance |
 | `efficientnet_b3` | 10.7M | Good balance for this dataset size |
 | `efficientnet_b4` | 17.6M | Heavier, may overfit with few images |
 | `convnext_tiny` | 28.6M | Modern architecture, strong transfer learning |
-| `convnext_small` | 50.2M | Larger ConvNeXt variant |
+| `convnext_small` | 50.2M | **Final ensemble member** — strongest single model |
+
+---
+
+## Ensemble
+
+After completing the hyperparameter sweep, the two best-performing checkpoints were combined into a **soft-voting ensemble**:
+
+| Model | Val accuracy (standalone) |
+|-------|---------------------------|
+| EfficientNet-B2 | ~97% |
+| ConvNeXt-Small | ~98% |
+| **Ensemble (avg logits)** | **~97.9%** |
+
+The ensemble averages the raw softmax probabilities from both models before taking the argmax. Neither model needs to be retrained — the two `best_model.pth` checkpoints are loaded simultaneously at inference time.
+
+**Why these two?**  
+- EfficientNet-B2 and ConvNeXt-Small have different inductive biases (compound-scaled CNN vs. modern pure-convolution transformer-style), so their errors are partially uncorrelated.  
+- Both are compact enough to run in parallel on a single consumer GPU (RTX 4070 Laptop) without OOM.
+
+---
 
 ### Recovering a checkpoint from a previous run
 
@@ -247,37 +267,45 @@ The app supports uploading and classifying multiple images at once. Results are 
 
 ## Results
 
-> Results below reflect the best run found so far. Update after sweeps complete.
+Results correspond to the **EfficientNet-B2 + ConvNeXt-Small ensemble** evaluated on the validation set.
+
+### Global metrics
 
 | Metric | Value |
 |--------|-------|
-| Validation accuracy | **XX.X%** |
-| Macro F1-score | **X.XX** |
-| Best backbone | `efficientnet_bX` |
-| Best dropout | `X.X` |
-| Best lr phase 1 | `X.XXXX` |
-| Best lr phase 2 | `X.XXXXX` |
-| Sweep runs completed | **XX** |
+| Overall accuracy (ensemble) | **97.67%** |
+| Best individual backbone | `convnext_small` |
+| Ensemble strategy | Soft voting (average softmax probabilities) |
 
-**Per-class F1-score (best run):**
+### Per-class accuracy (from normalised confusion matrix)
 
-| Class | Precision | Recall | F1 |
-|-------|-----------|--------|----|
-| Bedroom | X.XX | X.XX | X.XX |
-| Coast | X.XX | X.XX | X.XX |
-| Forest | X.XX | X.XX | X.XX |
-| Highway | X.XX | X.XX | X.XX |
-| Industrial | X.XX | X.XX | X.XX |
-| Inside city | X.XX | X.XX | X.XX |
-| Kitchen | X.XX | X.XX | X.XX |
-| Living room | X.XX | X.XX | X.XX |
-| Mountain | X.XX | X.XX | X.XX |
-| Office | X.XX | X.XX | X.XX |
-| Open country | X.XX | X.XX | X.XX |
-| Store | X.XX | X.XX | X.XX |
-| Street | X.XX | X.XX | X.XX |
-| Suburb | X.XX | X.XX | X.XX |
-| Tall building | X.XX | X.XX | X.XX |
+Values on the diagonal of the normalised confusion matrix represent per-class recall (= accuracy for that class).
+
+| Class | Accuracy |
+|-------|---------|
+| Bedroom | 96% |
+| Coast | 98% |
+| Forest | 98% |
+| Highway | 99% |
+| Industrial | 97% |
+| Inside city | 95% |
+| Kitchen | 97% |
+| Living room | 99% |
+| Mountain | 99% |
+| Office | 100% |
+| Open country | 95% |
+| Store | 96% |
+| Street | 100% |
+| Suburb | 100% |
+| Tall building | 98% |
+
+### Confusion matrix
+
+Normalised confusion matrix (rows = ground truth, columns = predicted). The model was evaluated on the validation split with the ensemble of EfficientNet-B2 and ConvNeXt-Small.
+
+![Confusion matrix](confusion_matrix.png)
+
+> The hardest class pairs are **Inside city ↔ Suburb** (2% confusion) and **Open country ↔ Coast** (3% confusion), which is expected given their visual similarity.
 
 ---
 
