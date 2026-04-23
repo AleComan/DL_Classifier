@@ -303,9 +303,9 @@ Values on the diagonal of the normalised confusion matrix represent per-class re
 
 Normalised confusion matrix (rows = ground truth, columns = predicted). The model was evaluated on the validation split with the ensemble of EfficientNet-B2 and ConvNeXt-Small.
 
-![Confusion matrix](confusion_matrix.png)
+![Confusion matrix](models/confusion_matrix.png)
 
-> The hardest class pairs are **Inside city ↔ Suburb** (2% confusion) and **Open country ↔ Coast** (3% confusion), which is expected given their visual similarity.
+> The hardest class pairs are **Bedroom ↔ Living room** (3%) and **Open country ↔ Coast** (3%), followed by **Inside city ↔ Tall building** (2%) and **Industrial ↔ Store** (2%). These confusions are expected given the visual similarity between the scene types.
 
 ---
 
